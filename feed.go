@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
+	gcfg "code.google.com/p/gcfg"
 	"io"
 	"net/http"
 	"net/url"
@@ -28,6 +29,12 @@ import (
 	"strings"
 	"time"
 )
+
+type Config struct {
+	Main struct {
+		Mysql string
+	}
+}
 
 type Item struct {
 	id        int
@@ -46,18 +53,25 @@ type Item struct {
 var db      *sql.DB
 var err     error
 var version string
+var cfg     Config
 
 func main() {
-	err = OpenDatabase(); if err != nil { os.Exit(1) }
-	defer db.Close()
+	err = gcfg.ReadFileInto(&cfg, "feed.ini")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: Failed to parse gcfg data: %s\n", err.Error())
+	} else {
+		err = OpenDatabase(cfg.Main.Mysql); if err != nil { os.Exit(1) }
+		defer db.Close()
 
-	// This sets up a new feed and polls it for new channels/items.
-	// Invoke it with 'go PollFeed(...)' to have the polling performed in a separate goroutine, so you can continue with the rest of your program.
-	PollFeed("http://www.dar.fm/rss/3083dda", 5)
+		// This sets up a new feed and polls it for new channels/items.
+		// Invoke it with 'go PollFeed(...)' to have the polling performed in a separate goroutine, so you can continue with the rest of your program.
+		PollFeed("http://www.dar.fm/rss/3083dda", 5)
+	}
 }
 
-func OpenDatabase() error {
-	db, err = sql.Open("mysql", "root:root@unix(/Applications/MAMP/tmp/mysql/mysql.sock)/golang?parseTime=true")
+func OpenDatabase(pipefnam string) error {
+	fmt.Printf("INFO: MYSQL: connecting to: %s\n", pipefnam);
+	db, err = sql.Open("mysql", pipefnam);
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: MYSQL: can't connect to database[1]: %s\n", err.Error())
 		return err
