@@ -32,7 +32,9 @@ import (
 
 type Config struct {
 	Main struct {
-		Mysql string
+		Mysql   string
+		Rss     string
+		Timeout int
 	}
 }
 
@@ -65,7 +67,7 @@ func main() {
 
 		// This sets up a new feed and polls it for new channels/items.
 		// Invoke it with 'go PollFeed(...)' to have the polling performed in a separate goroutine, so you can continue with the rest of your program.
-		PollFeed("http://www.dar.fm/rss/3083dda", 5)
+		PollFeed(cfg.Main.Rss, cfg.Main.Timeout)
 	}
 }
 
