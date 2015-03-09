@@ -366,7 +366,7 @@ func update_json(mp3address string, json string, status_int int64) error {
 		return err
 	}
 	if raff <= 0 {
-		fmt.Print("INFO: both json and status(%d) for '%s' haven't changed\n", status_int, mp3address);
+		fmt.Printf("INFO: both json and status(%d) for '%s' haven't changed\n", status_int, mp3address);
 	}
 	return nil;
 }
@@ -464,11 +464,11 @@ func download_mp3(var_fnam string, mp3address string) error {
 
 	fmt.Printf("INFO: getting %q\n", mp3address)
 	resp, err = http.Get(mp3address)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: can't get '%s' ... %v\n", mp3address, err);
 		return err
 	}
+	defer resp.Body.Close()
 
 	n, err = io.Copy(out, resp.Body)
 	fmt.Printf("INFO: %d bytes written to %s\n", n, var_fnam); // check whether length matches?
