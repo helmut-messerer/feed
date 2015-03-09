@@ -480,9 +480,10 @@ func query_item(mp3address string) (Item, error) {
 	var item Item
 	err = db.QueryRow("SELECT i.* FROM items i LEFT JOIN statuses s ON (i.status=s.id) WHERE i.url=?", mp3address).Scan(&item.Id, &item.Mts, &item.Sts, &item.Status, &item.Title, &item.PubDate, &item.Guid, &item.Url, &item.Filename, &item.Length, &item.Type, &item.Json);
 	switch {
-	  case err == sql.ErrNoRows: return Item{}, nil; // not sure what...
+	  case err == sql.ErrNoRows: fmt.Printf("INFO: can't find '%s'\n", mp3address);          return Item{}, nil; // not sure what...
 	  case err != nil          : fmt.Fprintf(os.Stderr, "ERROR: can't read row: %v\n", err); return Item{}, err;
 	}
+	fmt.Printf("INFO: found item %v\n", item);
 	return item, nil
 }
 
